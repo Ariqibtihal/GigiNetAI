@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 
 import Navbar from './components/Navbar'
-import HeroSection from './components/HeroSection'
+import LandingPage from './components/LandingPage'
 import UploadSection from './components/UploadSection'
 import ScanButton from './components/ScanButton'
 import LoadingState from './components/LoadingState'
@@ -111,7 +111,7 @@ export default function App() {
             <main className="flex-1 w-full flex flex-col">
                 {/* Home View */}
                 {view === 'home' && (
-                    <HeroSection onStartClick={handleHeroStartClick} />
+                    <LandingPage onStartClick={handleHeroStartClick} />
                 )}
 
                 {/* Upload View */}

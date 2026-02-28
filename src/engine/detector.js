@@ -126,51 +126,73 @@ function descriptionForDiagnosis(diagId, score) {
 const SCAN_DURATION = 2800
 
 export function simulateAnalysis(file) {
-    return new Promise((resolve) => {
-        const diagId = pickDiagnosis(file.name)
-        const cfg = DIAGNOSIS_MAP[diagId]
-        const score = Math.round(rand(cfg.range[0], cfg.range[1]))
-        const detections = generateDetections(diagId)
+    return new Promise(async (resolve, reject) => {
+        try {
+            const formData = new FormData()
+            formData.append('image', file)
 
-        setTimeout(() => {
-            resolve({
-                timestamp: new Date().toISOString(),
-                fileName: file.name,
-                fileSize: (file.size / 1024).toFixed(1) + ' KB',
-                analysisTime: (SCAN_DURATION / 1000).toFixed(1) + ' detik',
-                model: 'ResNet-50 v2.5.0 (Caries+Tartar)',
-                score,
-                style: cfg.style,
-                severityLabel: cfg.label,
-                severityColor: cfg.color,
-                description: descriptionForDiagnosis(diagId, score),
-                detections,
-                findings: detections.map((d) => {
-                    let descObj = ''
-                    if (d.diseaseType === 'caries') {
-                        descObj = d.style === 'severe'
-                            ? 'Kavitas telah menembus dentin hingga mendekati pulpa. Ancaman nyeri konstan.'
-                            : 'Kerusakan tahap awal pada email gigi. Resiko menjalar jika dibiarkan.'
-                    } else {
-                        descObj = d.style === 'severe'
-                            ? 'Deposit kalkulus padat subgingival. Memerlukan scaling ekstensif.'
-                            : 'Kalkulus supragingival ditemukan. Pembersihan standar sudah cukup.'
-                    }
-                    return {
-                        ...d,
-                        name: d.diseaseType === 'caries' ? `Lesi Karies Gigi #${d.id}` : `Deposit Karang Gigi #${d.id}`,
-                        desc: descObj,
-                    }
-                }),
-                recommendations: RECOMMENDATIONS[diagId],
-                stats: {
-                    regions: 6,
-                    detections: detections.length,
-                    avgConfidence: detections.length > 0
-                        ? (detections.reduce((s, d) => s + d.confidence, 0) / detections.length * 100).toFixed(1) + '%'
-                        : 'N/A',
-                },
+            // Try to connect to real backend first
+            const response = await fetch('http://localhost:8000/api/analyze', {
+                method: 'POST',
+                body: formData
             })
-        }, SCAN_DURATION)
+
+            if (!response.ok) {
+                throw new Error('API Request Failed')
+            }
+
+            const data = await response.json()
+            resolve(data)
+
+        } catch (error) {
+            console.warn('Real API failed or backend not running, falling back to local simulation...', error)
+
+            // Fallback mock logic if server is offline
+            const diagId = pickDiagnosis(file.name)
+            const cfg = DIAGNOSIS_MAP[diagId]
+            const score = Math.round(rand(cfg.range[0], cfg.range[1]))
+            const detections = generateDetections(diagId)
+
+            setTimeout(() => {
+                resolve({
+                    timestamp: new Date().toISOString(),
+                    fileName: file.name,
+                    fileSize: (file.size / 1024).toFixed(1) + ' KB',
+                    analysisTime: (SCAN_DURATION / 1000).toFixed(1) + ' detik',
+                    model: 'ResNet-50 v2.5.0 (Caries+Tartar) - Local Mock Fallback',
+                    score,
+                    style: cfg.style,
+                    severityLabel: cfg.label,
+                    severityColor: cfg.color,
+                    description: descriptionForDiagnosis(diagId, score),
+                    detections,
+                    findings: detections.map((d) => {
+                        let descObj = ''
+                        if (d.diseaseType === 'caries') {
+                            descObj = d.style === 'severe'
+                                ? 'Kavitas telah menembus dentin hingga mendekati pulpa. Ancaman nyeri konstan.'
+                                : 'Kerusakan tahap awal pada email gigi. Resiko menjalar jika dibiarkan.'
+                        } else {
+                            descObj = d.style === 'severe'
+                                ? 'Deposit kalkulus padat subgingival. Memerlukan scaling ekstensif.'
+                                : 'Kalkulus supragingival ditemukan. Pembersihan standar sudah cukup.'
+                        }
+                        return {
+                            ...d,
+                            name: d.diseaseType === 'caries' ? `Lesi Karies Gigi #${d.id}` : `Deposit Karang Gigi #${d.id}`,
+                            desc: descObj,
+                        }
+                    }),
+                    recommendations: RECOMMENDATIONS[diagId],
+                    stats: {
+                        regions: 6,
+                        detections: detections.length,
+                        avgConfidence: detections.length > 0
+                            ? (detections.reduce((s, d) => s + d.confidence, 0) / detections.length * 100).toFixed(1) + '%'
+                            : 'N/A',
+                    },
+                })
+            }, SCAN_DURATION)
+        }
     })
 }
