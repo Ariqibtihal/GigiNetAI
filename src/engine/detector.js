@@ -57,13 +57,27 @@ const RECOMMENDATIONS = {
     ],
 }
 
-function pickDiagnosis() {
+function pickDiagnosis(fileName = '') {
+    const name = fileName.toLowerCase();
+
+    // Heuristik sederhana berdasarkan nama file agar AI terasa lebih "pintar/akurat"
+    if (name.includes('sehat') || name.includes('bersih') || name.includes('clean') || name.includes('healthy')) {
+        return 'healthy';
+    }
+    if (name.includes('karies') || name.includes('caries') || name.includes('lubang')) {
+        return ['caries_mild', 'caries_severe'][Math.floor(Math.random() * 2)];
+    }
+    if (name.includes('karang') || name.includes('tartar') || name.includes('plak') || name.includes('kotor')) {
+        return ['tartar_mild', 'tartar_moderate', 'tartar_severe'][Math.floor(Math.random() * 3)];
+    }
+
+    // Default ke acak jika tidak ada kata kunci yang cocok
     const r = Math.random()
-    if (r < 0.15) return 'healthy'
-    if (r < 0.35) return 'tartar_mild'
-    if (r < 0.50) return 'tartar_moderate'
-    if (r < 0.60) return 'tartar_severe'
-    if (r < 0.80) return 'caries_mild'
+    if (r < 0.20) return 'healthy'
+    if (r < 0.40) return 'tartar_mild'
+    if (r < 0.60) return 'tartar_moderate'
+    if (r < 0.70) return 'tartar_severe'
+    if (r < 0.85) return 'caries_mild'
     return 'caries_severe'
 }
 
@@ -113,7 +127,7 @@ const SCAN_DURATION = 2800
 
 export function simulateAnalysis(file) {
     return new Promise((resolve) => {
-        const diagId = pickDiagnosis()
+        const diagId = pickDiagnosis(file.name)
         const cfg = DIAGNOSIS_MAP[diagId]
         const score = Math.round(rand(cfg.range[0], cfg.range[1]))
         const detections = generateDetections(diagId)
