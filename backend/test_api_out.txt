@@ -1,0 +1,15 @@
+Menguji Backend di: http://127.0.0.1:8000/api/analyze
+Mempersiapkan gambar simulasi gigi...
+Mengirim gambar ke Otak AI YOLOv8...
+
+==================================================
+[+] HASIL UJI COBA MURNI (AI INFERENCE)
+==================================================
+Model Engine : YOLOv8 Real Inference Engine
+Status Skrining : Gigi Sehat & Bersih (Skor: 88)
+Banyak Karies/Lubang Terdeteksi : 0
+
+Rekomendasi Otomatis:
+ - Sikat gigi 2x sehari
+ - Gunakan dental floss
+ - Kontrol rutin ke dokter gigi
