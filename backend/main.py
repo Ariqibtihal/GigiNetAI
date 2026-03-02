@@ -85,16 +85,9 @@ def pick_diagnosis(filename: str):
         return 'gingivitus'
     if any(k in name for k in ['discolor', 'kuning', 'stain', 'warna']):
         return 'toothdiscoloration'
-    if any(k in name for k in ['ulcer', 'sariawan', 'apht']):
-        return 'ulcer'
-    
-    # Default ke acak jika tidak ada kata kunci yang cocok (Lebih condong ke sehat)
-    r = random.random()
-    if r < 0.60: return 'healthy'
-    if r < 0.75: return 'caries_mild'
-    if r < 0.85: return 'gingivitus'
-    if r < 0.95: return 'toothdiscoloration'
-    return 'ulcer'
+    # Jika tidak ada kata kunci penyakit di nama file, secara bawaan (default) kita anggap Sehat,
+    # daripada AI asal menebak sakit secara acak (Hallucination).
+    return 'healthy'
 
 def generate_detections(diag_id: str):
     if diag_id == 'healthy':

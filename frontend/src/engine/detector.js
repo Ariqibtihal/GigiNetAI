@@ -67,18 +67,13 @@ function pickDiagnosis(fileName = '') {
     if (name.includes('karies') || name.includes('caries') || name.includes('lubang')) {
         return ['caries_mild', 'caries_severe'][Math.floor(Math.random() * 2)];
     }
-    if (name.includes('karang') || name.includes('tartar') || name.includes('plak') || name.includes('kotor')) {
+    if (name.includes('karang') || name.includes('tartar') || name.includes('plak') || name.includes('kotor') || name.includes('calculus')) {
         return ['tartar_mild', 'tartar_moderate', 'tartar_severe'][Math.floor(Math.random() * 3)];
     }
 
-    // Default ke acak jika tidak ada kata kunci yang cocok (Lebih condong ke sehat)
-    const r = Math.random()
-    if (r < 0.60) return 'healthy'
-    if (r < 0.70) return 'tartar_mild'
-    if (r < 0.80) return 'tartar_moderate'
-    if (r < 0.85) return 'tartar_severe'
-    if (r < 0.95) return 'caries_mild'
-    return 'caries_severe'
+    // Secara bawaan (default), jika gambar tidak memiliki kata kunci penyakit (misal: "IMG_123.jpg")
+    // maka kita harus menganggap gigi tersebut SEHAT, tidak secara asal menembak menjadi sakit.
+    return 'healthy';
 }
 
 function generateDetections(diagId) {
