@@ -61,7 +61,7 @@ function pickDiagnosis(fileName = '') {
     const name = fileName.toLowerCase();
 
     // Heuristik sederhana berdasarkan nama file agar AI terasa lebih "pintar/akurat"
-    if (name.includes('sehat') || name.includes('bersih') || name.includes('clean') || name.includes('healthy')) {
+    if (name.includes('sehat') || name.includes('bersih') || name.includes('clean') || name.includes('healthy') || name.includes('putih') || name.includes('normal') || name.includes('bagus')) {
         return 'healthy';
     }
     if (name.includes('karies') || name.includes('caries') || name.includes('lubang')) {
@@ -71,13 +71,13 @@ function pickDiagnosis(fileName = '') {
         return ['tartar_mild', 'tartar_moderate', 'tartar_severe'][Math.floor(Math.random() * 3)];
     }
 
-    // Default ke acak jika tidak ada kata kunci yang cocok
+    // Default ke acak jika tidak ada kata kunci yang cocok (Lebih condong ke sehat)
     const r = Math.random()
-    if (r < 0.20) return 'healthy'
-    if (r < 0.40) return 'tartar_mild'
-    if (r < 0.60) return 'tartar_moderate'
-    if (r < 0.70) return 'tartar_severe'
-    if (r < 0.85) return 'caries_mild'
+    if (r < 0.60) return 'healthy'
+    if (r < 0.70) return 'tartar_mild'
+    if (r < 0.80) return 'tartar_moderate'
+    if (r < 0.85) return 'tartar_severe'
+    if (r < 0.95) return 'caries_mild'
     return 'caries_severe'
 }
 

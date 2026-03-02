@@ -77,7 +77,7 @@ RECOMMENDATIONS = {
 
 def pick_diagnosis(filename: str):
     name = filename.lower()
-    if any(k in name for k in ['sehat', 'bersih', 'clean', 'healthy']):
+    if any(k in name for k in ['sehat', 'bersih', 'clean', 'healthy', 'putih', 'normal', 'bagus']):
         return 'healthy'
     if any(k in name for k in ['karies', 'caries', 'lubang']):
         return random.choice(['caries_mild', 'caries_severe'])
@@ -87,12 +87,13 @@ def pick_diagnosis(filename: str):
         return 'toothdiscoloration'
     if any(k in name for k in ['ulcer', 'sariawan', 'apht']):
         return 'ulcer'
+    
+    # Default ke acak jika tidak ada kata kunci yang cocok (Lebih condong ke sehat)
     r = random.random()
-    if r < 0.20: return 'healthy'
-    if r < 0.40: return 'caries_mild'
-    if r < 0.60: return 'caries_severe'
-    if r < 0.75: return 'gingivitus'
-    if r < 0.90: return 'toothdiscoloration'
+    if r < 0.60: return 'healthy'
+    if r < 0.75: return 'caries_mild'
+    if r < 0.85: return 'gingivitus'
+    if r < 0.95: return 'toothdiscoloration'
     return 'ulcer'
 
 def generate_detections(diag_id: str):
