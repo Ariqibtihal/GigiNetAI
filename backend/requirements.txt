@@ -6,5 +6,5 @@ pydantic
 torch
 torchvision
 ultralytics
-opencv-python
+opencv-python-headless
 numpy

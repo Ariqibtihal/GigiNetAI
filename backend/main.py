@@ -1,4 +1,8 @@
-from fastapi import FastAPI, File, UploadFile
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
+
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import time
 import random
@@ -9,7 +13,7 @@ app = FastAPI(title="DentalScan AI API")
 # Setup CORS to allow React frontend to communicate with this backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["*"], # Allow all origins for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,11 +34,11 @@ def rand(min_val, max_val):
 
 DIAGNOSIS_MAP = {
     'healthy': {'label': 'Gigi Sehat & Bersih', 'color': '#22C55E', 'range': [85, 100], 'style': 'none', 'type': 'healthy'},
-    'tartar_mild': {'label': 'Karang Gigi Ringan', 'color': '#F59E0B', 'range': [65, 84], 'style': 'mild', 'type': 'tartar'},
-    'tartar_moderate': {'label': 'Karang Gigi Sedang', 'color': '#f97316', 'range': [40, 64], 'style': 'moderate', 'type': 'tartar'},
-    'tartar_severe': {'label': 'Karang Gigi Parah', 'color': '#EF4444', 'range': [10, 39], 'style': 'severe', 'type': 'tartar'},
     'caries_mild': {'label': 'Karies (Lubang) Awal', 'color': '#F59E0B', 'range': [50, 75], 'style': 'mild', 'type': 'caries'},
-    'caries_severe': {'label': 'Karies (Lubang) Dalam', 'color': '#EF4444', 'range': [10, 39], 'style': 'severe', 'type': 'caries'},
+    'caries_severe': {'label': 'Karies (Lubang) Parah', 'color': '#EF4444', 'range': [10, 39], 'style': 'severe', 'type': 'caries'},
+    'gingivitus': {'label': 'Gingivitis (Radang Gusi)', 'color': '#f97316', 'range': [40, 64], 'style': 'moderate', 'type': 'gingivitus'},
+    'toothdiscoloration': {'label': 'Perubahan Warna Gigi', 'color': '#a78bfa', 'range': [55, 80], 'style': 'mild', 'type': 'discoloration'},
+    'ulcer': {'label': 'Sariawan / Ulser', 'color': '#ef4444', 'range': [30, 60], 'style': 'severe', 'type': 'ulcer'},
 }
 
 RECOMMENDATIONS = {
@@ -42,21 +46,6 @@ RECOMMENDATIONS = {
         {'title': 'Sikat gigi 2x sehari', 'desc': 'Gunakan pasta gigi berfluoride dan sikat selama 2 menit setiap pagi dan malam.'},
         {'title': 'Gunakan dental floss', 'desc': 'Bersihkan sela-sela gigi dengan benang gigi minimal sekali sehari.'},
         {'title': 'Kontrol rutin ke dokter gigi', 'desc': 'Jadwalkan pemeriksaan gigi setiap 6 bulan untuk deteksi dini.'}
-    ],
-    'tartar_mild': [
-        {'title': 'Lakukan scaling gigi', 'desc': 'Jadwalkan pembersihan karang gigi profesional dalam 3 bulan ke depan.'},
-        {'title': 'Sikat gigi 2x sehari', 'desc': 'Fokus pada area garis gusi dengan gerakan memutar yang lembut.'},
-        {'title': 'Gunakan dental floss', 'desc': 'Flossing harian mencegah plak mengeras menjadi karang gigi.'}
-    ],
-    'tartar_moderate': [
-        {'title': 'Segera lakukan scaling gigi', 'desc': 'Jadwalkan scaling dan root planing profesional dalam 2 minggu.'},
-        {'title': 'Gunakan dental floss & mouthwash', 'desc': 'Gunakan benang gigi dan kumur antibakteri untuk pembersihan ekstra.'},
-        {'title': 'Perhatikan kesehatan gusi', 'desc': 'Waspadai tanda gingivitis: gusi berdarah, bengkak, atau kemerahan.'}
-    ],
-    'tartar_severe': [
-        {'title': 'Segera ke dokter gigi', 'desc': 'Buat janji untuk scaling dan polishing profesional secepatnya.'},
-        {'title': 'Perawatan Lanjutan', 'desc': 'Scaling subgingival dan root planing mungkin diperlukan untuk mencegah periodontitis.'},
-        {'title': 'Tingkatkan Rutinitas', 'desc': 'Gunakan pasta gigi tartar control dan obat kumur chlorhexidine.'}
     ],
     'caries_mild': [
         {'title': 'Tambal Gigi (Restorasi)', 'desc': 'Segera ke dokter gigi untuk menambal karies awal sebelum bertambah dalam dan mengenai saraf.'},
@@ -68,7 +57,22 @@ RECOMMENDATIONS = {
         {'title': 'Medikamentosa Nyeri (Resep)', 'desc': 'Untuk meredakan nyeri berdenyut, minumlah analgetik (Misal: Asam Mefenamat / Ibuprofen 400mg) sesuai anjuran.'},
         {'title': 'Terapi Antibiotik (Resep)', 'desc': 'Jika disertai gusi bengkak (abses), dokter mungkin akan meresepkan Amoxicillin/Clindamycin.'},
         {'title': 'Hindari Beban Kunyah', 'desc': 'Gunakan sisi rahang sebelahnya agar gigi berlubang tidak patah berkeping.'}
-    ]
+    ],
+    'gingivitus': [
+        {'title': 'Kunjungi Dokter Gigi Segera', 'desc': 'Gingivitis yang tidak ditangani dapat berkembang menjadi periodontitis yang merusak tulang rahang.'},
+        {'title': 'Sikat Gigi Lembut di Area Gusi', 'desc': 'Gunakan sikat gigi berbulu halus untuk membersihkan plak di garis gusi tanpa melukai jaringan.'},
+        {'title': 'Gunakan Obat Kumur Antiseptik', 'desc': 'Kumur dengan chlorhexidine 0.12% atau produk povidone iodine untuk mengurangi inflamasi bakteri gusi.'}
+    ],
+    'toothdiscoloration': [
+        {'title': 'Konsultasi Pemutihan Gigi', 'desc': 'Dokter gigi dapat merekomendasikan bleaching profesional atau veneer untuk perbaikan estetika.'},
+        {'title': 'Kurangi Makanan/Minuman Pewarna', 'desc': 'Hindari konsumsi berlebihan kopi, teh, dan rokok yang mempercepat diskolorasi permukaan email.'},
+        {'title': 'Scaling & Polishing Rutin', 'desc': 'Pembersihan karang gigi profesional setiap 6 bulan membantu menjaga kecerahan dan kebersihan gigi.'}
+    ],
+    'ulcer': [
+        {'title': 'Oleskan Gel Antiseptik', 'desc': 'Gunakan gel yang mengandung benzocaine atau triamcinolone acetonide untuk mempercepat sembuhnya sariawan.'},
+        {'title': 'Hindari Makanan Pedas/Asam', 'desc': 'Makanan pedas, asam, atau bertekstur keras dapat memperparah iritasi dan memperlambat penyembuhan.'},
+        {'title': 'Periksa Status Imun', 'desc': 'Sariawan berulang bisa menandakan defisiensi vitamin B12, zat besi, atau gangguan imun. Periksakan darah ke dokter.'}
+    ],
 }
 
 def pick_diagnosis(filename: str):
@@ -77,58 +81,79 @@ def pick_diagnosis(filename: str):
         return 'healthy'
     if any(k in name for k in ['karies', 'caries', 'lubang']):
         return random.choice(['caries_mild', 'caries_severe'])
-    if any(k in name for k in ['karang', 'tartar', 'plak', 'kotor', 'kalkulus']):
-        return random.choice(['tartar_mild', 'tartar_moderate', 'tartar_severe'])
-    
+    if any(k in name for k in ['gingivit', 'gusi', 'gum']):
+        return 'gingivitus'
+    if any(k in name for k in ['discolor', 'kuning', 'stain', 'warna']):
+        return 'toothdiscoloration'
+    if any(k in name for k in ['ulcer', 'sariawan', 'apht']):
+        return 'ulcer'
     r = random.random()
     if r < 0.20: return 'healthy'
-    if r < 0.40: return 'tartar_mild'
-    if r < 0.60: return 'tartar_moderate'
-    if r < 0.70: return 'tartar_severe'
-    if r < 0.85: return 'caries_mild'
-    return 'caries_severe'
+    if r < 0.40: return 'caries_mild'
+    if r < 0.60: return 'caries_severe'
+    if r < 0.75: return 'gingivitus'
+    if r < 0.90: return 'toothdiscoloration'
+    return 'ulcer'
 
 def generate_detections(diag_id: str):
     if diag_id == 'healthy':
         return []
     
     is_caries = diag_id.startswith('caries')
-    count = round(rand(1, 4)) if is_caries else round(rand(2, 6))
+    is_ulcer = diag_id == 'ulcer'
+    is_gingivitus = diag_id == 'gingivitus'
+    is_discoloration = diag_id == 'toothdiscoloration'
+    count = round(rand(1, 3)) if is_caries else round(rand(1, 4))
     
     detections = []
     for i in range(count):
         style_str = 'mild'
-        if 'severe' in diag_id:
-            style_str = random.choice(['mild', 'moderate', 'severe'])
-        elif 'moderate' in diag_id:
+        if 'severe' in diag_id or is_ulcer:
+            style_str = random.choice(['moderate', 'severe'])
+        elif 'moderate' in diag_id or is_gingivitus:
             style_str = random.choice(['mild', 'moderate'])
             
         if is_caries:
             label = 'Karies Dalam' if style_str == 'severe' else 'Karies Permukaan'
+            disease_type = 'caries'
+        elif is_gingivitus:
+            label = 'Gingivitis Aktif'
+            disease_type = 'gingivitus'
+        elif is_discoloration:
+            label = 'Area Diskolorasi'
+            disease_type = 'toothdiscoloration'
+        elif is_ulcer:
+            label = 'Ulser / Sariawan'
+            disease_type = 'ulcer'
         else:
-            label = 'Karang Parah' if style_str == 'severe' else ('Karang Sedang' if style_str == 'moderate' else 'Karang Ringan')
+            label = 'Anomali Terdeteksi'
+            disease_type = 'unknown'
 
         detections.append({
             'id': i + 1,
             'x': rand(8, 68),
             'y': rand(10, 65),
-            'w': rand(14, 26),
-            'h': rand(10, 16) if is_caries else rand(10, 22),
+            'w': rand(12, 24),
+            'h': rand(10, 18),
             'style': style_str,
             'severityLabel': label,
             'confidence': rand(0.72, 0.97),
             'region': random.choice(REGIONS),
-            'diseaseType': 'caries' if is_caries else 'tartar'
+            'diseaseType': disease_type
         })
     return detections
 
 def description_for_diagnosis(diag_id: str, score: int):
     if diag_id == 'healthy':
-        return f"Sangat baik! Skor kesehatan {score}/100. Tidak ada indikasi karang atau lubang gigi. Pertahankan kebiasaan sehat Anda."
-    if diag_id.startswith('tartar'):
-        return f"Terdeteksi kalkulus/karang gigi (skor: {score}/100). Plak yang mengeras perlahan harus dibersihkan oleh tenaga profesional untuk mencegah penurunan gusi."
+        return f"Sangat baik! Skor kesehatan {score}/100. Tidak ada indikasi kelainan pada gigi. Pertahankan kebiasaan sehat Anda."
     if diag_id.startswith('caries'):
         return f"TERDETEKSI KARIES ATAU LUBANG GIGI (skor: {score}/100). Struktur enamel gigi tampak mengalami demineralisasi/kerusakan struktural yang memerlukan perawatan medis aktif."
+    if diag_id == 'gingivitus':
+        return f"TERDETEKSI GINGIVITIS (skor: {score}/100). Tanda-tanda peradangan pada jaringan gusi terdeteksi. Segera lakukan pembersihan profesional dan perawatan gusi."
+    if diag_id == 'toothdiscoloration':
+        return f"TERDETEKSI PERUBAHAN WARNA GIGI (skor: {score}/100). Permukaan gigi menunjukkan deposit atau perubahan warna yang dapat disebabkan oleh plak, makanan, atau faktor lain."
+    if diag_id == 'ulcer':
+        return f"TERDETEKSI ULSER / SARIAWAN (skor: {score}/100). Lesi pada jaringan lunak mulut teridentifikasi. Perlu evaluasi lebih lanjut oleh dokter gigi."
     return ""
 
 @app.post("/api/analyze")
@@ -140,8 +165,13 @@ async def analyze_image(image: UploadFile = File(...)):
     file_size_kb = len(file_bytes) / 1024
     
     # Try logic from AI Engine (Real Inference if .pt exists, otherwise mock)
-    from ai_engine import ai_controller
-    ai_result = ai_controller.analyze(file_bytes)
+    try:
+        from ai_engine import ai_controller
+        ai_result = ai_controller.analyze(file_bytes)
+    except Exception as e:
+        import traceback
+        print(f"[Engine Error] {traceback.format_exc()}")
+        ai_result = {"status": "mock"}
     
     if ai_result.get("status") == "mock":
         # Fallback heuristic analyzer
@@ -208,7 +238,7 @@ async def analyze_image(image: UploadFile = File(...)):
         "description": description_for_diagnosis(diag_id, score),
         "detections": detections,
         "findings": findings,
-        "recommendations": RECOMMENDATIONS[diag_id],
+        "recommendations": RECOMMENDATIONS.get(diag_id, RECOMMENDATIONS['healthy']),
         "stats": {
             "regions": 6,
             "detections": len(detections),

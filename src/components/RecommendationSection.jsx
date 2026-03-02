@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useToast } from './Toast'
 import { generateClinicalPDF } from '../lib/pdfGenerator'
 
-export default function RecommendationSection({ recommendations, severity, onNewScan }) {
+export default function RecommendationSection({ recommendations, severity, onNewScan, result, preview }) {
     const toast = useToast()
     const [isDownloading, setIsDownloading] = useState(false)
 
@@ -10,11 +10,12 @@ export default function RecommendationSection({ recommendations, severity, onNew
         try {
             setIsDownloading(true)
             toast.info('Menyiapkan dokumen PDF...')
-            await generateClinicalPDF('dentascan-report', `PT-${Math.floor(Math.random() * 10000)}`)
-            toast.success('Laporan PDF berhasil diunduh.')
+            const pid = `PT-${Math.floor(Math.random() * 10000)}`
+            await generateClinicalPDF('dentascan-report', pid, result, preview)
+            toast.success('Laporan PDF berhasil diunduh!')
         } catch (err) {
             console.error(err)
-            toast.error('Gagal membuat PDF.')
+            toast.error('Gagal membuat PDF: ' + err.message)
         } finally {
             setIsDownloading(false)
         }

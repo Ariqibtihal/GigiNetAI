@@ -8,6 +8,8 @@ import LoadingState from './components/LoadingState'
 import ResultSection from './components/ResultSection'
 import RecommendationSection from './components/RecommendationSection'
 import HistorySection from './components/HistorySection'
+import AboutPage from './components/AboutPage'
+import ContactPage from './components/ContactPage'
 import Footer from './components/Footer'
 import { useToast } from './components/Toast'
 import { simulateAnalysis } from './engine/detector'
@@ -98,6 +100,16 @@ export default function App() {
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }, [])
 
+    const handleNavAbout = useCallback(() => {
+        setView('about')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, [])
+
+    const handleNavContact = useCallback(() => {
+        setView('contact')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, [])
+
     /* ─── Render ─── */
     return (
         <div className="min-h-screen flex flex-col bg-[#F8FAFC] font-sans text-[#1A1A1A] antialiased">
@@ -106,12 +118,24 @@ export default function App() {
                 onHomeClick={handleNavHome}
                 onScanClick={handleNavScan}
                 onHistoryClick={handleNavHistory}
+                onAboutClick={handleNavAbout}
+                onContactClick={handleNavContact}
             />
 
             <main className="flex-1 w-full flex flex-col">
                 {/* Home View */}
                 {view === 'home' && (
                     <LandingPage onStartClick={handleHeroStartClick} />
+                )}
+
+                {/* About View */}
+                {view === 'about' && (
+                    <AboutPage />
+                )}
+
+                {/* Contact View */}
+                {view === 'contact' && (
+                    <ContactPage />
                 )}
 
                 {/* Upload View */}
@@ -144,6 +168,8 @@ export default function App() {
                             recommendations={result.recommendations}
                             severity={result.severity}
                             onNewScan={handleNewScan}
+                            result={result}
+                            preview={preview}
                         />
                     </div>
                 )}
