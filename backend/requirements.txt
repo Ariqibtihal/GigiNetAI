@@ -1,3 +1,6 @@
+# Gunakan PyTorch versi CPU (Jauh lebih kecil & cepat) untuk mencegah Server Crash / Timeout
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 fastapi
 uvicorn
 python-multipart
