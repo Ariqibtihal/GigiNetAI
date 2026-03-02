@@ -1,6 +1,6 @@
 # 🦷 GigiNet AI (NeuroDent)
 
-![GigiNet AI Preview](public/step2.png)
+![GigiNet AI Preview](frontend/public/step2.png)
 
 **GigiNet AI** adalah platform aplikasi berbasis web (*medical-tech*) cerdas yang menggunakan teknologi kecerdasan buatan (AI) mutakhir untuk menganalisis dan mendeteksi kondisi klinis gigi (seperti Karies, Karang Gigi, Gingivitis, Sariawan, dan Diskolorasi) secara instan dan akurat. 
 
