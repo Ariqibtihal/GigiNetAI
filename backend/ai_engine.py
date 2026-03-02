@@ -1,10 +1,17 @@
-from ultralytics import YOLO
-import torch
-import torchvision.models as models
-import torchvision.transforms as transforms
 import os
 import io
 from PIL import Image, ImageOps
+
+# Wrap massive ML libraries in Try/Except so Railway doesn't crash trying to install 3GB of PyTorch
+try:
+    from ultralytics import YOLO
+    import torch
+    import torchvision.models as models
+    import torchvision.transforms as transforms
+    AI_LIBS_AVAILABLE = True
+except ImportError:
+    AI_LIBS_AVAILABLE = False
+    print("⚠️  [WARNING] PyTorch/Ultralytics not found! Server will run in MOCK/SIMULATION mode.")
 
 # ---------------------------------------------------------
 # Dental AI Model Controller (Mock Initial Setup for YOLOv8 & ResNet50)
@@ -12,8 +19,12 @@ from PIL import Image, ImageOps
 
 class DentalAIController:
     def __init__(self):
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        print(f"[DentalAI] Starting Initialization on device: {self.device}")
+        if AI_LIBS_AVAILABLE:
+            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            print(f"[DentalAI] Starting Initialization on device: {self.device}")
+        else:
+            self.device = None
+            print("[DentalAI] Running in Mock Mode. AI Libraries are disabled.")
         
         self.yolo_model = None
         self.resnet_model = None
@@ -28,6 +39,9 @@ class DentalAIController:
         self._load_resnet()
 
     def _load_yolo(self):
+        if not AI_LIBS_AVAILABLE:
+            return
+            
         yolo_path = os.path.join(self.model_dir, 'yolo_dental_detection.pt')
         try:
             if os.path.exists(yolo_path):
@@ -39,6 +53,9 @@ class DentalAIController:
             print(f"[DentalAI] Failed to load YOLO: {str(e)}")
 
     def _load_resnet(self):
+        if not AI_LIBS_AVAILABLE:
+            return
+            
         resnet_path = os.path.join(self.model_dir, 'resnet_dental_severity.pth')
         try:
             # Prepare standard ResNet50 architecture 
