@@ -118,6 +118,20 @@ export default function UploadSection({ file, preview, onFileSelect, onRemove })
                                 desc="Arahkan lensa tegak lurus ke depan, pastikan seluruh rentang gigi berada di dalam area frame."
                             />
                         </div>
+
+                        {/* Supported Classes Info */}
+                        <div className="mt-8 border-t border-[#f1f5f9] pt-6">
+                            <h4 className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest text-center mb-4">
+                                Kapabilitas Deteksi AI Saat Ini
+                            </h4>
+                            <div className="flex flex-wrap justify-center gap-2">
+                                {['✅ Gigi Sehat', '🦷 Karies (Lubang)', '🪨 Karang Gigi (Kalkulus)', '🩸 Gingivitis', '🤒 Sariawan (Ulser)', '☕ Diskolorasi (Noda)'].map((item) => (
+                                    <span key={item} className="px-3 py-1.5 bg-[#f8fafc] border border-[#e2e8f0] text-[#475569] text-[12px] font-semibold rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                                        {item}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                     </>
                 ) : (
                     /* ─── Preview State ─── */
