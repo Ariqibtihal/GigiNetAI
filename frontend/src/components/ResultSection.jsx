@@ -10,13 +10,13 @@ const SEVERITY_STYLES = {
 export default function ResultSection({ result, preview }) {
     const [showOverlay, setShowOverlay] = useState(true)
     const s = SEVERITY_STYLES[result.style] || SEVERITY_STYLES.none
-    const circumference = 2 * Math.PI * 60; // radius 60
+    const circumference = 2 * Math.PI * 45; // radius 45
 
     return (
-        <section className="animate-fade-in-up space-y-6">
+        <section className="animate-fade-in-up space-y-5">
 
             {/* ─── Header Laporan yang Elegan ─── */}
-            <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#F1F5F9] relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="bg-white rounded-[1.5rem] p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#F1F5F9] relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 {/* Latar Belakang Abstrak Halus */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#4A90A4]/10 to-transparent rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
 
@@ -47,14 +47,14 @@ export default function ResultSection({ result, preview }) {
                 </div>
 
                 {/* Score Indicator Lingkar Modern */}
-                <div className="relative z-10 flex flex-col items-center shrink-0 bg-[#F8FAFC]/50 p-4 rounded-3xl border border-[#F1F5F9] shadow-sm">
-                    <div className="relative w-[140px] h-[140px]">
-                        <svg viewBox="0 0 140 140" className="w-full h-full -rotate-90 drop-shadow-sm">
-                            <circle cx="70" cy="70" r="60" fill="none" stroke="#F1F5F9" strokeWidth="10" />
+                <div className="relative z-10 flex flex-col items-center shrink-0 bg-[#F8FAFC]/50 p-3 rounded-[1.5rem] border border-[#F1F5F9] shadow-sm">
+                    <div className="relative w-[110px] h-[110px]">
+                        <svg viewBox="0 0 110 110" className="w-full h-full -rotate-90 drop-shadow-sm">
+                            <circle cx="55" cy="55" r="45" fill="none" stroke="#F1F5F9" strokeWidth="8" />
                             <circle
-                                cx="70" cy="70" r="60" fill="none"
+                                cx="55" cy="55" r="45" fill="none"
                                 stroke={result.severityColor}
-                                strokeWidth="8"
+                                strokeWidth="6"
                                 strokeLinecap="round"
                                 strokeDasharray={circumference}
                                 strokeDashoffset={circumference - (result.score / 100) * circumference}
@@ -73,10 +73,10 @@ export default function ResultSection({ result, preview }) {
                 </div>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid lg:grid-cols-2 gap-5">
 
                 {/* ─── Penampil Foto & Deteksi (Elegan) ─── */}
-                <div className="bg-white rounded-[2rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#F1F5F9] flex flex-col h-full">
+                <div className="bg-white rounded-[1.5rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#F1F5F9] flex flex-col max-h-[460px]">
                     <div className="flex items-center justify-between mb-5 px-2">
                         <h3 className="text-[15px] font-bold text-[#1A1A1A] flex items-center gap-2.5">
                             <svg className="w-4 h-4 text-[#4A90A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,11 +102,11 @@ export default function ResultSection({ result, preview }) {
                     </div>
 
                     {/* Latar Belakang Gambar yg Bersih */}
-                    <div className="rounded-[1.5rem] overflow-hidden bg-[#F8FAFC] border border-[#F1F5F9] flex-1 flex items-center justify-center min-h-[350px] p-2">
+                    <div className="rounded-[1.25rem] overflow-hidden bg-[#F8FAFC] border border-[#F1F5F9] flex-1 flex items-center justify-center min-h-[250px] p-2">
 
                         {/* WADA INTI GAMBAR (Relative) - Ini fixing bug bounding box! */}
-                        <div className="relative inline-block max-w-full max-h-[450px]">
-                            <img src={preview} alt="Visual Radiograf" className="w-auto h-auto max-w-full max-h-[450px] object-contain block z-0 filter drop-shadow-sm select-none" />
+                        <div className="relative inline-block max-w-full max-h-[350px]">
+                            <img src={preview} alt="Visual Radiograf" className="w-auto h-auto max-w-full max-h-[350px] object-contain block z-0 filter drop-shadow-sm select-none" />
 
                             {showOverlay && result.detections.map((d) => {
                                 const ds = SEVERITY_STYLES[d.style] || SEVERITY_STYLES.mild
@@ -120,11 +120,11 @@ export default function ResultSection({ result, preview }) {
                                         <div className={`absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold px-3 py-1.5 rounded-full whitespace-nowrap shadow-md flex items-center gap-1.5 tracking-wide ${ds.label} after:content-[''] after:absolute after:top-[98%] after:left-1/2 after:-translate-x-1/2 after:border-[5px] after:border-transparent after:border-t-[inherit]`}>
                                             <span>{
                                                 d.diseaseType === 'caries' ? 'Karies' :
-                                                d.diseaseType === 'gingivitus' || d.diseaseType === 'gingivitis' ? 'Gingivitis' :
-                                                d.diseaseType === 'ulcer' ? 'Ulkus' :
-                                                d.diseaseType === 'toothdiscoloration' || d.diseaseType === 'tooth discoloration' ? 'Diskolorasi' :
-                                                d.diseaseType === 'tartar' || d.diseaseType === 'calculus' ? 'Kalkulus' :
-                                                d.severityLabel || 'Anomali'
+                                                    d.diseaseType === 'gingivitus' || d.diseaseType === 'gingivitis' ? 'Gingivitis' :
+                                                        d.diseaseType === 'ulcer' ? 'Ulkus' :
+                                                            d.diseaseType === 'toothdiscoloration' || d.diseaseType === 'tooth discoloration' ? 'Diskolorasi' :
+                                                                d.diseaseType === 'tartar' || d.diseaseType === 'calculus' ? 'Kalkulus' :
+                                                                    d.severityLabel || 'Anomali'
                                             }</span>
                                             <span className="w-1 h-1 rounded-full bg-white/40"></span>
                                             <span>{(d.confidence * 100).toFixed(0)}%</span>
@@ -138,9 +138,9 @@ export default function ResultSection({ result, preview }) {
                 </div>
 
                 {/* ─── Daftar Temuan (Bentuk Kartu Modern) ─── */}
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-5 max-h-[460px]">
                     {/* Ringkasan Statistik Cantik */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4 shrink-0">
                         <div className="bg-white rounded-[1.5rem] p-5 border border-[#F1F5F9] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-4 hover:shadow-md transition-shadow">
                             <div className="w-12 h-12 rounded-full bg-[#E0F2FE] flex items-center justify-center">
                                 <span className="text-xl font-bold text-[#0284C7]">{result.stats.regions}</span>
@@ -162,7 +162,7 @@ export default function ResultSection({ result, preview }) {
                     </div>
 
                     {/* Log Kartu Estetik */}
-                    <div className="bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#F1F5F9] flex-1 flex flex-col">
+                    <div className="bg-white rounded-[1.5rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#F1F5F9] flex-1 flex flex-col min-h-0">
                         <h3 className="text-[15px] font-bold text-[#1A1A1A] flex items-center gap-2.5 mb-5">
                             <svg className="w-4 h-4 text-[#4A90A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
